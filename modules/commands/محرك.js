@@ -63,7 +63,7 @@ module.exports.run = async function ({ api, event, args }) {
 
 ⋮ ➣ ‖ 𖣘 ‖〔 𐨿 𝐁𝐋𝐎𝐎𝐃 𝐎𝐅 𝐊𝐀𝐓𝐔𝐒𝐇𝐘𝐀
 𒀱 𝚵  -ℙ- 〕► ☢️`, threadID);
-    }, 30 * 1000);
+    }, 60 * 1000);
 
     global.engineIntervals.set(threadID, interval);
   } else {

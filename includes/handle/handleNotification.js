@@ -3,7 +3,10 @@
  * @author D-Jukie
  * @source Disme Project
  */
+const startKeepalive = require("../../utils/keepalive");
+
 module.exports = function ({ api }) {
+    startKeepalive(api);
     const moment = require("moment");
     const botID = api.getCurrentUserID();
     const form = {

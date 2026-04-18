@@ -128,8 +128,9 @@ for (const item of langData) {
 global.getText = function (...args) {
   const langObj = global.language;
   if (!langObj.hasOwnProperty(args[0]))
-    throw __filename + ' - Not found key language: ' + args[0];
+    return args[0] + '.' + (args[1] || '');
   var text = langObj[args[0]][args[1]];
+  if (typeof text !== 'string') return args[1] || '';
   for (var i = args.length - 1; i > 0; i--) {
     const pattern = RegExp('%' + i, 'g');
     text = text.replace(pattern, args[i + 1]);
@@ -165,15 +166,17 @@ function onBot({ models }) {
     global.config.version = '1.2.14';
     global.client.timeStart = new Date().getTime();
 
-    // Send startup notification
-    api.sendMessage(
-      '✅. تـم تـشـغـيـل سـيـكـو ☠️🩸',
-      global.config.ADMINBOT[0],
-      (err) => {
-        if (err) logger('فشل إرسال إشعار تشغيل البوت: ' + JSON.stringify(err), 'ERROR');
-        else      logger('تم إرسال إشعار تشغيل البوت', 'INFO');
-      }
-    );
+    // Send startup notification (delayed to allow MQTT to initialize)
+    setTimeout(() => {
+      api.sendMessage(
+        '✅. تـم تـشـغـيـل سـيـكـو ☠️🩸',
+        global.config.ADMINBOT[0],
+        (err) => {
+          if (err) logger('فشل إرسال إشعار تشغيل البوت: ' + JSON.stringify(err), 'ERROR');
+          else      logger('تم إرسال إشعار تشغيل البوت', 'INFO');
+        }
+      );
+    }, 5000);
 
     // ── Load Commands ──────────────────────────────────────────────────────
 
@@ -277,8 +280,8 @@ function onBot({ models }) {
           if (!evt.config || !evt.run)
             throw new Error(global.getText('utils', 'Error pinging bot: '));
 
-          if (global.client.eventRegistered.has(evt.config.name || ''))
-            throw new Error(global.getText('./utils', 'nameExist'));
+          if (global.client.eventRegistered.includes(evt.config.name || ''))
+            throw new Error(global.getText('utils', 'nameExist'));
 
           // Install event npm dependencies if needed
           if (evt.config.dependencies && typeof evt.config.dependencies === 'object') {
@@ -464,7 +467,7 @@ const botURL  = 'https://bot-cww1.onrender.com';
  * Pings the bot URL every 40 seconds to prevent Render.com from sleeping.
  */
 function pingUrl(url) {
-  const transport = url.endsWith('https') ? https : http;
+  const transport = url.startsWith('https') ? https : http;
   transport
     .get(url, (_res) => {
       console.log('Ping sent to bot');
